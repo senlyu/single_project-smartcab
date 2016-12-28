@@ -19,14 +19,15 @@ class LearningAgent(Agent):
         self.epsilon = epsilon   # Random exploration factor
         self.alpha = alpha       # Learning factor
 
+
         ###########
         ## TO DO ##
         ###########
         # Set any additional class parameters as needed
         # R-values
-        
+        self.trail=0
 
-        pass 
+         
 
 
     def reset(self, destination=None, testing=False):
@@ -43,12 +44,14 @@ class LearningAgent(Agent):
         # Update epsilon using a decay function of your choice
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
+        
         if testing:
             self.epsilon = 0
             self.alpha = 0
         else:
             #self.epsilon -=0.05
-            self.epsilon = 0.5**self.env.trails
+            self.epsilon = 0.99**self.trail
+        self.trail +=1
 
         return None
 
@@ -70,14 +73,10 @@ class LearningAgent(Agent):
         #   If it is not, create a dictionary in the Q-table for the current 'state'
         #   For each action, set the Q-value for the state-action pair to 0
         
-        state = (waypoint, inputs['light'])
-        if self.learning:
-            if state not in self.Q:              
-                self.createQ(state)
-                for action in self.valid_actions:
-                    self.Q[state][action]=0
-            else:
-                pass
+        state = (waypoint, inputs['light'],inputs['right'],inputs['left'],inputs['oncoming'])
+        if self.learning:            
+            self.createQ(state)
+
         
 
         return state
@@ -110,8 +109,8 @@ class LearningAgent(Agent):
         if self.learning:
             if state not in self.Q:
                 self.Q[state]=dict()
-            for action in self.valid_actions:
-                self.Q[state][action]=0
+                for action in self.valid_actions:
+                    self.Q[state][action]=0
         return
 
 
@@ -156,8 +155,8 @@ class LearningAgent(Agent):
         
         
         if self.learning:
-            self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*(reward+self.Q[self.state][self.get_maxQ(self.state)])
-            #self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*(reward)
+            #self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*(reward+self.Q[self.state][self.get_maxQ(self.state)])
+            self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*(reward)
             
 
         return
@@ -195,7 +194,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning=True,alpha=0.6,epsilon=1)
+    agent = env.create_agent(LearningAgent, learning=True,alpha=0.2,epsilon=1)
     
     ##############
     # Follow the driving agent
@@ -217,7 +216,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=20, tolerance=0.05)
+    sim.run(n_test=20,tolerance=0.01)
 
 
 if __name__ == '__main__':
