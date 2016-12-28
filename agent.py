@@ -153,7 +153,7 @@ class LearningAgent(Agent):
         
         
         if self.learning:
-            self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*reward
+            self.Q[state][action]=(1-self.alpha)*self.Q[state][action]+self.alpha*(reward+self.Q[state][self.get_maxQ(state)])
             
 
         return
